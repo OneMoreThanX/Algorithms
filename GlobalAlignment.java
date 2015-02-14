@@ -49,29 +49,47 @@ public class GlobalAlignment {
 		//Trace back to find the alignment
 		ArrayList<Character> sa = new ArrayList<Character>();
 		ArrayList<Character> ta = new ArrayList<Character>();
-		sa.add(s[m-1-1]);
-		ta.add(t[n-1-1]);
 		int i = m-1;
-		while(i>1){
-			int j = n-1;
-			while(j>1){
-				if(DP[i-1][j-1] >= DP[i][j-1] && DP[i-1][j-1] >= DP[i-1][j]){
-					sa.add(s[i-1-1]);
-					ta.add(t[j-1-1]);
-					i = i-1;
-					j = j-1;
-				}
-				else if(DP[i-1][j] >= DP[i-1][j-1] && DP[i-1][j] >= DP[i][j-1]){
-					sa.add(s[i-1-1]);
-					ta.add('_');
-					i = i-1;
-				}
-				else if(DP[i][j-1] >= DP[i-1][j-1] && DP[i][j-1] >= DP[i-1][j]){
-					sa.add('_');
-					ta.add(t[j-1-1]);
-					j = j-1;
-				}
+		int j = n-1;
+		int mark1 = 0;
+		int mark2 = 0;
+		while(i>0 && j>0){
+			if(DP[i][j] == DP[i][j-1] + gap){
+				sa.add('-');
+				ta.add(t[j-1]);
+				j = j-1;
+				mark2 = mark2 + 1;
 			}
+			else if(DP[i][j] == DP[i-1][j] + gap){
+				sa.add(s[i-1]);
+				ta.add('-');
+				i = i-1;
+				mark1 = mark1 + 1;
+			}
+			else if((DP[i][j] == DP[i-1][j-1] + ma) || (DP[i][j] == DP[i-1][j-1] + mi)){
+				sa.add(s[i-1]);
+				ta.add(t[j-1]);
+				i = i-1;
+				j = j-1;
+				mark1 = mark1 + 1;
+				mark2 = mark2 + 1;
+			}
+			else{
+				System.out.println("ERROR: trace back error!");
+				break;
+			}
+		}
+		while(i > 0){
+			int index = s.length - mark1 - 1;
+			sa.add(s[index]);
+			ta.add('-');
+			i = i-1;
+		}
+		while(j > 0){
+			int index = t.length - mark2 - 1;
+			sa.add('-');
+			ta.add(t[index]);
+			j = j-1;
 		}
 		Collections.reverse(sa);
 		Collections.reverse(ta);
@@ -81,7 +99,7 @@ public class GlobalAlignment {
 	
 	public static void main(String args[]){
 		char[] s = {'t','c','a','c','g','t','a'};
-		char[] t = {'t','g','c','g','t','a'};
+		char[] t = {'a','g','t','c','a','c','g','a'};
 		GlobalAlignment test = new GlobalAlignment(s,t);
 		System.out.println("Table is "+test.m+" * "+test.n);
 		test.score(s, t);
